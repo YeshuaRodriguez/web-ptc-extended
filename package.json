@@ -1,6 +1,7 @@
 {
   "name": "web-ptc",
   "private": true,
+  "homepage": "https://yeshuarodriguez.github.io/web-ptc",
   "version": "0.0.0",
   "type": "module",
   "scripts": {

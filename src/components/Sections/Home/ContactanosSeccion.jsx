@@ -32,7 +32,7 @@ const [formData, setFormData] = useState({
     try {
       setLoading(true);
 
-      const res = await fetch("http://localhost:3001/send-email", {
+      const res = await fetch("https://web-ptc-extended.onrender.com/send-email", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

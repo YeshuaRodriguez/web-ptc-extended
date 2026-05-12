@@ -15,5 +15,5 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lightningcss', '@tailwindcss/oxide'],
   },
-  base: '/',
+  base: '/web-ptc-extended/',
 })

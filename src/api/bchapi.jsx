@@ -8,7 +8,7 @@ function TipoCambio() {
 
   useEffect(() => {
     const obtenerCompraDolar = async () => {
-      const response = await fetch("http://localhost:3001/api/compra-dolar");
+      const response = await fetch("https://web-ptc-extended.onrender.com/api/compra-dolar");
       const data = await response.json();
       setCompraDolar(data.Valor);
     };
@@ -18,7 +18,7 @@ function TipoCambio() {
 
   useEffect(() => {
     const obtenerVentaDolar = async () => {
-      const response = await fetch("http://localhost:3001/api/venta-dolar");
+      const response = await fetch("https://web-ptc-extended.onrender.com/api/venta-dolar");
       const data = await response.json();
       setVentaDolar(data.Valor);
     };

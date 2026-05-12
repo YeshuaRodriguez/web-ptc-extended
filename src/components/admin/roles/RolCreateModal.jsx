@@ -33,7 +33,7 @@ export default function RolCreateModal({open, onOpenChange, token}){
                 }
             })
 
-            const response = await fetch("http://localhost:3001/api/roles", {
+            const response = await fetch("https://web-ptc-extended.onrender.com/api/roles", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

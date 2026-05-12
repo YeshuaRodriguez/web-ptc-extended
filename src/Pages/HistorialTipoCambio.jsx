@@ -12,7 +12,7 @@ export default function HistorialTipoCambio() {
 
     const obtenerHistorial = async () => {
 
-      const response = await fetch("http://localhost:3001/api/compra-dolar-historial");
+      const response = await fetch("https://web-ptc-extended.onrender.com/api/compra-dolar-historial");
       const data = await response.json();
 
       setHistorial(data);
@@ -27,7 +27,7 @@ export default function HistorialTipoCambio() {
 
     const obtenerHistorialVenta = async () => {
 
-      const response = await fetch("http://localhost:3001/api/venta-dolar-historial");
+      const response = await fetch("https://web-ptc-extended.onrender.com/api/venta-dolar-historial");
       const data = await response.json();
 
       setHistorialVenta(data);

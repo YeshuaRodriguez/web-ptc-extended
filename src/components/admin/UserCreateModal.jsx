@@ -30,7 +30,7 @@ export default function UserCreateModal({ open, onOpenChange, token }) {
             }
         })
 
-        const response = await fetch("http://localhost:3001/api/users", {
+        const response = await fetch("https://web-ptc-extended.onrender.com/api/users", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

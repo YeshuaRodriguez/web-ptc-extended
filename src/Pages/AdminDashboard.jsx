@@ -42,13 +42,13 @@ export default function AdminDashboard() {
             const headers = { Authorization: `Bearer ${token}` }
 
             const [resumen, historial, paginas, ubicacion, eventos, dispositivos, horas] = await Promise.all([
-                fetch("http://localhost:3001/api/analytics/resumen", { headers }).then(res => res.json()),
-                fetch("http://localhost:3001/api/analytics/historial", { headers }).then(res => res.json()),
-                fetch("http://localhost:3001/api/analytics/paginas", { headers }).then(res => res.json()),
-                fetch("http://localhost:3001/api/analytics/ubicacion", { headers }).then(res => res.json()),
-                fetch("http://localhost:3001/api/analytics/eventos", { headers }).then(res => res.json()),
-                fetch("http://localhost:3001/api/analytics/dispositivos", { headers }).then(res => res.json()),
-                fetch("http://localhost:3001/api/analytics/horas", { headers }).then(res => res.json()),
+                fetch("https://web-ptc-extended.onrender.com/api/analytics/resumen", { headers }).then(res => res.json()),
+                fetch("https://web-ptc-extended.onrender.com/api/analytics/historial", { headers }).then(res => res.json()),
+                fetch("https://web-ptc-extended.onrender.com/api/analytics/paginas", { headers }).then(res => res.json()),
+                fetch("https://web-ptc-extended.onrender.com/api/analytics/ubicacion", { headers }).then(res => res.json()),
+                fetch("https://web-ptc-extended.onrender.com/api/analytics/eventos", { headers }).then(res => res.json()),
+                fetch("https://web-ptc-extended.onrender.com/api/analytics/dispositivos", { headers }).then(res => res.json()),
+                fetch("https://web-ptc-extended.onrender.com/api/analytics/horas", { headers }).then(res => res.json()),
             ])
 
             setAnalytics(resumen)

@@ -140,7 +140,7 @@ export default function AdminLayout() {
             <div className="flex justify-between items-center p-2 px-4">
               <div>{isAuthenticated && <p>{user.nickname}</p>}</div>
               <button
-                onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+                onClick={() => logout({ logoutParams: { returnTo: window.location.origin + '/web-ptc-extended' } })}
                 className="p-1 bg-warning-primary rounded-md hover:scale-110 hover:bg-rose-800 transition cursor-pointer border-solid border-2 border-red-900">
                 <LogOut className="h-4 w-4" />
               </button>
