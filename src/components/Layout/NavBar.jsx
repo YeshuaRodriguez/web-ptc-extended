@@ -51,7 +51,7 @@ export default function NavBar() {
           {/* A C E R C A */}
           <li className="hidden md:block relative z-50" onMouseEnter={handleAcercaMouseEnter} onMouseLeave={handleAcercaMouseLeave}>
             <div className="inline-block">
-              <HashLink to="/acerca#titulo" className='inline-flex items-center transition-transform duration-300 hover:scale-110'>
+              <HashLink to="/acerca#titulo" className='inline-flex items-center transition-transform duration-300 hover:scale-110 text-text-primary-static'>
                 Acerca
               </HashLink>
               {isAcercaHovering && (
@@ -82,7 +82,7 @@ export default function NavBar() {
           {/* C O N T A C T O */}
           <li className="hidden md:block relative z-50" onMouseEnter={handleContactMouseEnter} onMouseLeave={handleContactMouseLeave}>
             <div className="inline-block">
-              <HashLink to="/contacto#titulo" className="inline-flex items-center transition-transform duration-300 hover:scale-110">
+              <HashLink to="/contacto#titulo" className="inline-flex items-center transition-transform duration-300 hover:scale-110 text-text-primary-static">
                 Contacto
               </HashLink>
               {isContactHovering && (
@@ -109,11 +109,11 @@ export default function NavBar() {
               transition={{ duration: 0.25, ease: "easeOut" }}
               className="md:hidden absolute top-20 left-1/2 -translate-x-1/2 w-[90%] rounded-2xl bg-bg-nav/95 backdrop-blur-xl p-6 flex flex-col gap-4 text-center shadow-2xl"
             >
-              <HashLink to="/contacto#titulo" onClick={() => setIsMobileMenuOpen(false)}>
+              <HashLink className="text-text-primary-static" to="/contacto#titulo" onClick={() => setIsMobileMenuOpen(false)}>
                 Contacto
               </HashLink>
 
-              <HashLink to="/acerca#titulo" onClick={() => setIsMobileMenuOpen(false)}>
+              <HashLink className="text-text-primary-static" to="/acerca#titulo" onClick={() => setIsMobileMenuOpen(false)}>
                 Acerca
               </HashLink>
             </motion.div>

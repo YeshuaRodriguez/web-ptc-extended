@@ -128,18 +128,19 @@ const CarouselControl = ({
 };
 
 export default function Carousel({
-  slides
+  slides,
+  autoPlay = false,
+  autoPlayInterval = 4000
 }) {
   const [current, setCurrent] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
   const handlePreviousClick = () => {
-    const previous = current - 1;
-    setCurrent(previous < 0 ? slides.length - 1 : previous);
+    setCurrent((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
   };
 
   const handleNextClick = () => {
-    const next = current + 1;
-    setCurrent(next === slides.length ? 0 : next);
+    setCurrent((prev) => (prev + 1) % slides.length);
   };
 
   const handleSlideClick = (index) => {
@@ -148,12 +149,24 @@ export default function Carousel({
     }
   };
 
+  useEffect(() => {
+    if (!autoPlay || isPaused || slides.length <= 1) return;
+
+    const intervalId = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % slides.length);
+    }, autoPlayInterval);
+
+    return () => clearInterval(intervalId);
+  }, [autoPlay, autoPlayInterval, isPaused, slides.length]);
+
   const id = useId();
 
   return (
     <div
       className="relative w-[70vmin] h-[70vmin] mx-auto"
-      aria-labelledby={`carousel-heading-${id}`}>
+      aria-labelledby={`carousel-heading-${id}`}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}>
       <ul
         className="absolute flex mx-[-4vmin] transition-transform duration-1000 ease-in-out"
         style={{

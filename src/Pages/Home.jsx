@@ -43,7 +43,7 @@ export default function Home() {
         <div className="flex flex-col my-40">
           <QuienesSomos/>
 
-          <LinkButton linkto="/acerca#titulo" bg="bg-brand-accent" titulo="Más Acerca" />
+          <LinkButton linkto="/acerca#titulo" bg="bg-brand-accent" titulo="Acerca" />
 
         </div>
 

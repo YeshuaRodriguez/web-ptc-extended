@@ -528,6 +528,7 @@ app.use(express.json())
 
   app.get('/api/analytics/resumen', checkJwt, async (req, res) => {
     try {
+      console.log(req.auth)
       const [response] = await analyticsClient.runReport({
         property: `properties/${PROPERTY_ID}`,
         dateRanges: [{ startDate: '7daysAgo', endDate: 'today' }],
@@ -539,6 +540,16 @@ app.use(express.json())
           { name: 'totalUsers' },
         ],
       })
+
+      if (!response.rows || response.rows.length === 0) {
+  return res.json({
+    pageViews: 0,
+    avgSessionDuration: "0m 0s",
+    bounceRate: 0,
+    newUsers: 0,
+    totalUsers: 0
+  })
+}
 
       const values = response.rows[0].metricValues
 
@@ -558,6 +569,7 @@ app.use(express.json())
 
     } catch (error) {
       res.status(500).json({ error: error.message })
+      console.error(error)
     }
   })
 
@@ -565,6 +577,7 @@ app.use(express.json())
 
   app.get('/api/analytics/historial', checkJwt, async (req, res) => {
     try {
+      console.log(req.auth)
       const [response] = await analyticsClient.runReport({
         property: `properties/${PROPERTY_ID}`,
         dateRanges: [{ startDate: '7daysAgo', endDate: 'today' }],
@@ -599,12 +612,14 @@ app.use(express.json())
 
     } catch (error) {
       res.status(500).json({ error: error.message })
+      console.error(error)
     }
   })
 
   //DATOS DE PAGINAS ESPECIFICAS
   app.get('/api/analytics/paginas', checkJwt, async (req, res) => {
     try {
+      console.log(req.auth)
       const [response] = await analyticsClient.runReport({
         property: `properties/${PROPERTY_ID}`,
         dateRanges: [{ startDate: '7daysAgo', endDate: 'today' }],
@@ -650,6 +665,7 @@ app.use(express.json())
 
     } catch (error) {
       res.status(500).json({ error: error.message })
+      console.error(error)
     }
   })
 
@@ -657,6 +673,7 @@ app.use(express.json())
 
   app.get('/api/analytics/origen', checkJwt, async (req, res) => {
     try {
+      console.log(req.auth)
       const [response] = await analyticsClient.runReport({
         property: `properties/${PROPERTY_ID}`,
         dateRanges: [{ startDate: '7daysAgo', endDate: 'today' }],
@@ -674,6 +691,7 @@ app.use(express.json())
 
     } catch (error) {
       res.status(500).json({ error: error.message })
+      console.error(error)
     }
   })
 
@@ -681,6 +699,7 @@ app.use(express.json())
 
   app.get('/api/analytics/ubicacion', checkJwt, async (req, res) => {
     try {
+      console.log(req.auth)
       const [response] = await analyticsClient.runReport({
         property: `properties/${PROPERTY_ID}`,
         dateRanges: [{ startDate: '7daysAgo', endDate: 'today' }],
@@ -700,6 +719,7 @@ app.use(express.json())
 
     } catch (error) {
       res.status(500).json({ error: error.message })
+      console.error(error)
     }
   })
 
@@ -707,6 +727,7 @@ app.use(express.json())
 
   app.get('/api/analytics/dispositivos', checkJwt, async (req, res) => {
     try {
+      console.log(req.auth)
       const [response] = await analyticsClient.runReport({
         property: `properties/${PROPERTY_ID}`,
         dateRanges: [{ startDate: '7daysAgo', endDate: 'today' }],
@@ -724,11 +745,13 @@ app.use(express.json())
 
     } catch (error) {
       res.status(500).json({ error: error.message })
+      console.error(error)
     }
   })
 
   app.get('/api/analytics/horas', checkJwt, async (req, res) => {
     try {
+      console.log(req.auth)
       const [response] = await analyticsClient.runReport({
         property: `properties/${PROPERTY_ID}`,
         dateRanges: [{ startDate: '7daysAgo', endDate: 'today' }],
@@ -746,6 +769,7 @@ app.use(express.json())
 
     } catch (error) {
       res.status(500).json({ error: error.message })
+      console.error(error)
     }
   })
 
@@ -753,6 +777,7 @@ app.use(express.json())
 
   app.get('/api/analytics/eventos', checkJwt, async (req, res) => {
     try {
+      console.log(req.auth)
       const [response] = await analyticsClient.runReport({
         property: `properties/${PROPERTY_ID}`,
         dateRanges: [{ startDate: '7daysAgo', endDate: 'today' }],
@@ -778,6 +803,7 @@ app.use(express.json())
 
     } catch (error) {
       res.status(500).json({ error: error.message })
+      console.error(error)
     }
   })
 
@@ -1628,8 +1654,9 @@ app.use(express.json())
     }
   })
 
-
   //CHECK DE BACKEND CORRIENDO
+
+  
 
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

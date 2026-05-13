@@ -104,9 +104,9 @@ export default function TecnologiasSection() {
           className="text-4xl md:text-5xl font-black"
           style={{ color: "var(--text-primary)" }}
         >
-          Nuestras tecnologías
+          Nuestras
           <br />
-          <span style={{ color: "#5D8BB5" }}>más recientes</span>
+          <span style={{ color: "#5D8BB5" }}>soluciones</span>
         </h2>
       </motion.div>
 

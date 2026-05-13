@@ -10,35 +10,35 @@ export default function AlgunosServiciosSeccion(){
 
 const servicios = [
   {
-    quote: "Impulsamos el crecimiento mediante estrategias de ventas y optimización rentable del portafolio.",
-    name: "Comercial",
-    title: "Área Estratégica",
-    imgSrc: comercialImg,
-  },
-  {
-    quote: "Diseñamos estrategias promocionales que conectan marcas con clientes.",
-    name: "Mercadeo",
-    title: "Área de Marketing",
-    imgSrc: mercadeoImg,
-  },
-  {
-    quote: "Gestión integral multicanal enfocada en ventas y experiencia del cliente.",
-    name: "Call Center",
-    title: "Atención al Cliente",
-    imgSrc: callcenterImg,
-  },
-  {
-    quote: "Administración estratégica del crédito con control y gestión de riesgo.",
-    name: "Créditos",
-    title: "Gestión Financiera",
-    imgSrc: creditosImg,
-  },
-  {
-    quote: "Recuperación efectiva de cartera con tecnología y comunicación empática.",
-    name: "Cobros",
-    title: "Gestión de Recuperación",
-    imgSrc: cobrosImg,
-  },
+  quote: "Gestión integral multicanal enfocada en ventas y experiencia del cliente.",
+  name: "Call Center",
+  title: "Atención al Cliente",
+  imgSrc: callcenterImg,
+},
+{
+  quote: "Impulsamos el crecimiento mediante estrategias de ventas y optimización rentable del portafolio.",
+  name: "Colocación de productos",
+  title: "Área Estratégica",
+  imgSrc: comercialImg,
+},
+{
+  quote: "Administración estratégica del crédito con control y gestión de riesgo.",
+  name: "Créditos",
+  title: "Gestión Financiera",
+  imgSrc: creditosImg,
+},
+{
+  quote: "Recuperación efectiva de cartera con tecnología y comunicación empática.",
+  name: "Gestión de Recuperación",
+  title: "Gestión de Recuperación",
+  imgSrc: cobrosImg,
+},
+{
+  quote: "Diseñamos estrategias promocionales que conectan marcas con clientes.",
+  name: "Mercadeo",
+  title: "Área de Marketing",
+  imgSrc: mercadeoImg,
+},
 ];
     return(
         <>

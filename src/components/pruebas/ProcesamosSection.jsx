@@ -30,7 +30,7 @@ function AnimatedWord({ words }) {
 }
 
 export default function ProcesamosSection() {
-  const words = ["admisores", "adquirentes", "ustedes"]
+  const words = ["emisores", "adquirentes", "ustedes"]
 
   return (
     <div className=" flex flex-col justify-center gap-2 text-center mt-40 md:mt-20 mx-10">
