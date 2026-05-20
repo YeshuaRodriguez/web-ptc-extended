@@ -146,6 +146,209 @@ app.use(express.json())
     }
   });
 
+  app.get("/api/mails", checkJwt, async (req, res) => {
+  try {
+    const limitRaw = Number(req.query.limit)
+    const limit = Number.isFinite(limitRaw) ? Math.min(Math.max(limitRaw, 1), 100) : 50
+
+    const response = await fetch(`https://api.resend.com/emails?limit=${limit}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${process.env.RESEND_API_KEY}`
+      }
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      return res.status(response.status).json({
+        error: data?.message || "Error obteniendo correos desde Resend"
+      })
+    }
+
+    res.json(Array.isArray(data?.data) ? data.data : [])
+  } catch (error) {
+    console.error("Error obteniendo emails de Resend:", error)
+    res.status(500).json({ error: "Error interno del servidor" })
+  }
+})
+
+  app.get("/api/mails/:id", checkJwt, async (req, res) => {
+  try {
+    const response = await fetch(`https://api.resend.com/emails/${req.params.id}`, {
+      headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}` }
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      return res.status(response.status).json({ error: data.message })
+    }
+
+    res.json(data)
+  } catch (error) {
+    res.status(500).json({ error: "Error obteniendo detalle del correo" })
+  }
+})
+
+app.get("/api/tickets", checkJwt, requirePermission("read:tickets"), async (req, res) => {
+  try {
+    const ticketsPath = path.join(process.cwd(), "server", "tickets", "tickets.json")
+
+    if (!fs.existsSync(ticketsPath)) {
+      return res.json([])
+    }
+
+    const raw = fs.readFileSync(ticketsPath, "utf-8")
+    const data = JSON.parse(raw)
+
+    res.json(Array.isArray(data) ? data : [])
+  } catch (error) {
+    console.error("Error obteniendo tickets:", error)
+    res.status(500).json({ error: "Error interno del servidor" })
+  }
+})
+
+app.post("/api/tickets", checkJwt, requirePermission("create:tickets"), async (req, res) => {
+  try {
+    const { titulo, descripcion } = req.body
+
+    const cleanTitulo = titulo?.trim()
+    const cleanDescripcion = descripcion?.trim()
+
+    if (!cleanTitulo || !cleanDescripcion) {
+      return res.status(400).json({ error: "titulo y descripcion son obligatorios" })
+    }
+
+    const ticketsDir = path.join(process.cwd(), "server", "tickets")
+    const ticketsPath = path.join(ticketsDir, "tickets.json")
+
+    if (!fs.existsSync(ticketsDir)) {
+      fs.mkdirSync(ticketsDir, { recursive: true })
+    }
+
+    let tickets = []
+    if (fs.existsSync(ticketsPath)) {
+      const raw = fs.readFileSync(ticketsPath, "utf-8")
+      const parsed = JSON.parse(raw)
+      tickets = Array.isArray(parsed) ? parsed : []
+    }
+
+    const maxId = tickets.reduce((max, t) => {
+      const match = String(t.id || "").match(/^ticket-(\d+)$/i)
+      if (!match) return max
+      return Math.max(max, Number(match[1]))
+    }, 0)
+
+    const newTicket = {
+      id: `ticket-${String(maxId + 1).padStart(3, "0")}`,
+      titulo: cleanTitulo,
+      descripcion: cleanDescripcion,
+      estado: "recibido",
+      motivo_rechazo: null,
+      creado_en: new Date().toISOString()
+    }
+
+    tickets.unshift(newTicket)
+    fs.writeFileSync(ticketsPath, JSON.stringify(tickets, null, 2))
+
+    res.status(201).json(newTicket)
+  } catch (error) {
+    console.error("Error creando ticket:", error)
+    res.status(500).json({ error: "Error interno del servidor" })
+  }
+})
+
+app.patch("/api/tickets/:id", checkJwt, requirePermission("update:ticket_status"), async (req, res) => {
+  try {
+    const { id } = req.params
+    const { estado, motivo_rechazo } = req.body
+
+    const estadosValidos = ["recibido", "hecho", "rechazado"]
+    if (!estadosValidos.includes(estado)) {
+      return res.status(400).json({ error: "estado invalido" })
+    }
+
+    const ticketsPath = path.join(process.cwd(), "server", "tickets", "tickets.json")
+    if (!fs.existsSync(ticketsPath)) {
+      return res.status(404).json({ error: "No existe el archivo de tickets" })
+    }
+
+    const raw = fs.readFileSync(ticketsPath, "utf-8")
+    const tickets = JSON.parse(raw)
+
+    if (!Array.isArray(tickets)) {
+      return res.status(500).json({ error: "Formato de tickets invalido" })
+    }
+
+    const index = tickets.findIndex(t => t.id === id)
+    if (index === -1) {
+      return res.status(404).json({ error: "Ticket no encontrado" })
+    }
+
+    const actual = tickets[index]
+
+    // Si ya fue rechazado, no permitimos cambios posteriores.
+    if (actual.estado === "rechazado" && estado !== "rechazado") {
+      return res.status(400).json({ error: "No se puede modificar un ticket rechazado" })
+    }
+
+    if (estado === "rechazado") {
+      const motivo = motivo_rechazo?.trim()
+      if (!motivo) {
+        return res.status(400).json({ error: "motivo_rechazo es obligatorio para rechazar" })
+      }
+      tickets[index] = {
+        ...actual,
+        estado: "rechazado",
+        motivo_rechazo: motivo
+      }
+    } else {
+      tickets[index] = {
+        ...actual,
+        estado,
+        motivo_rechazo: null
+      }
+    }
+
+    fs.writeFileSync(ticketsPath, JSON.stringify(tickets, null, 2))
+    res.json(tickets[index])
+  } catch (error) {
+    console.error("Error actualizando ticket:", error)
+    res.status(500).json({ error: "Error interno del servidor" })
+  }
+})
+
+app.delete("/api/tickets/:id", checkJwt, requirePermission("delete:tickets"), async (req, res) => {
+  try {
+    const { id } = req.params
+    const ticketsPath = path.join(process.cwd(), "server", "tickets", "tickets.json")
+
+    if (!fs.existsSync(ticketsPath)) {
+      return res.status(404).json({ error: "No existe el archivo de tickets" })
+    }
+
+    const raw = fs.readFileSync(ticketsPath, "utf-8")
+    const tickets = JSON.parse(raw)
+
+    if (!Array.isArray(tickets)) {
+      return res.status(500).json({ error: "Formato de tickets invalido" })
+    }
+
+    const filtered = tickets.filter(t => t.id !== id)
+    if (filtered.length === tickets.length) {
+      return res.status(404).json({ error: "Ticket no encontrado" })
+    }
+
+    fs.writeFileSync(ticketsPath, JSON.stringify(filtered, null, 2))
+    res.json({ message: "Ticket eliminado correctamente" })
+  } catch (error) {
+    console.error("Error eliminando ticket:", error)
+    res.status(500).json({ error: "Error interno del servidor" })
+  }
+})
+
+
   //-------API BANCO CENTRAL---------
 
   //TIPO DE CAMBIO
@@ -591,7 +794,7 @@ app.use(express.json())
         orderBys: [{ dimension: { dimensionName: 'date' } }]
       })
 
-      const parsed = response.rows.map(row => {
+      const parsed = (response.rows ?? []).map(row => {
         const raw = row.dimensionValues[0].value
         const fecha = `${raw.slice(6, 8)}/${raw.slice(4, 6)}`
 
@@ -640,7 +843,7 @@ app.use(express.json())
         limit: 5
       })
 
-      const parsed = response.rows.map(row => ({
+      const parsed = (response.rows ?? []).map(row => ({
         pagina: row.dimensionValues[0].value,
         visitas: parseInt(row.metricValues[0].value)
       }))
@@ -682,7 +885,7 @@ app.use(express.json())
         orderBys: [{ metric: { metricName: 'sessions' }, desc: true }]
       })
 
-      const parsed = response.rows.map(row => ({
+      const parsed = (response.rows ?? []).map(row => ({
         origen: row.dimensionValues[0].value,
         sesiones: parseInt(row.metricValues[0].value)
       }))
@@ -709,7 +912,7 @@ app.use(express.json())
         limit: 5
       })
 
-      const parsed = response.rows.map(row => ({
+      const parsed = (response.rows ?? []).map(row => ({
         pais: row.dimensionValues[0].value,
         sesiones: parseInt(row.metricValues[0].value)
       }))
@@ -736,7 +939,7 @@ app.use(express.json())
         orderBys: [{ metric: { metricName: 'sessions' }, desc: true }]
       })
 
-      const parsed = response.rows.map(row => ({
+      const parsed = (response.rows ?? []).map(row => ({
         name: row.dimensionValues[0].value,  // "mobile", "desktop", "tablet"
         value: parseInt(row.metricValues[0].value)
       }))
@@ -760,7 +963,7 @@ app.use(express.json())
         orderBys: [{ dimension: { dimensionName: 'hour' } }]
       })
 
-      const parsed = response.rows.map(row => ({
+      const parsed = (response.rows ?? []).map(row => ({
         hora: `${row.dimensionValues[0].value}:00`,
         sesiones: parseInt(row.metricValues[0].value)
       }))
@@ -794,7 +997,7 @@ app.use(express.json())
         orderBys: [{ metric: { metricName: 'eventCount' }, desc: true }]
       })
 
-      const parsed = response.rows?.map(row => ({
+      const parsed = (response.rows ?? []).map(row => ({
         evento: row.dimensionValues[0].value,
         count: parseInt(row.metricValues[0].value)
       })) ?? []

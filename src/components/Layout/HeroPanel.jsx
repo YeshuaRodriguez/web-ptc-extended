@@ -1,10 +1,10 @@
-import HeroButton from "../ui/Buttons/HeroButton"
+  import HeroButton from "../ui/Buttons/HeroButton"
 import { ChevronsDown, CreditCard, ShieldBan, HandCoins } from "lucide-react"
 import { heroImages } from "/src/data/heroImages"
 import { fadeInBlur } from "../animations"
 import { motion } from "framer-motion";
 
-import heroImg from "../../assets/img/hero/herodisenoptcvisa.png";
+import heroImg from "../../assets/img/hero/herodisenoptcvisa.webp";
 import ptcLogo from "../../assets/img/common/PTC_2-removebg-preview.png";
 
 
@@ -22,9 +22,11 @@ export default function HeroPanel() {
 
         <img src={heroImg} alt="Hero background" className="absolute inset-0 w-full h-full object-cover z-0" />
 
-        <div className="absolute inset-0 bg-black/30" />
-
-        <div className="absolute inset-0 z-10" />
+        <div className="absolute inset-0 bg-black/20" />
+        <div
+          className="absolute bottom-0 left-0 right-0 h-24 md:h-36 z-10"
+          style={{ background: "linear-gradient(to top, var(--bg) 0%, transparent 100%)" }}
+        />
 
         <div className="relative z-20 flex min-h-screen items-center justify-center md:justify-end text-text-primary px-10">
 

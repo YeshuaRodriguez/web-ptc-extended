@@ -1,6 +1,8 @@
 import { HashLink } from "react-router-hash-link"
 import { Linkedin } from "lucide-react"
 import FooterColumn from "./FooterColumn";
+import ptcLogo from "../../assets/img/common/PTC_2-removebg-preview.png";
+
 
   const footerData = [
     {
@@ -58,7 +60,7 @@ export default function Footer(){
 
     {/* Logo */}
     <img
-      src="src/assets/img/common/PTC_2-removebg-preview.png"
+      src={ptcLogo}
       alt=""
       className="w-12 h-12"
     />

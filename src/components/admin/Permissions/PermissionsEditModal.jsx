@@ -62,9 +62,7 @@ export default function PermissionsEditModal({ open, onOpenChange, permission, o
         })
       })
 
-        console.log("Status:", res.status)
         const data = await res.json()
-        console.log("Response:", data)
 
       if (!res.ok) {
         setError(data.error || "Error actualizando permiso")
@@ -75,7 +73,6 @@ export default function PermissionsEditModal({ open, onOpenChange, permission, o
       onUpdated?.()
 
     } catch(err) {
-        console.error("Catch error:", err) // <-- agregá esto
         setError("Error de conexión con el servidor")
     } finally {
         setLoading(false)

@@ -1,6 +1,6 @@
 import { motion } from "framer-motion"
-import pixelpayImg from "../../assets/img/ecommerce.jpeg";
-import tapToPhoneImg from "../../assets/img/taptophone.png";
+import pixelpayImg from "../../assets/img/ecommerce.webp";
+import tapToPhoneImg from "../../assets/img/taptophone.webp";
 
 const fadeUp = (duration = 0.6, delay = 0) => ({
   hidden: { opacity: 0, y: 40 },

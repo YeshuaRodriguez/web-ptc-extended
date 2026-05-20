@@ -42,7 +42,7 @@ export default function HistorialTipoCambio() {
 
     <>
 
-      <MiniHero titulo="Historial de valor del dolar" descripcion="Archivo histórico (7 días) del tipo de cambio de referencia. Consulta valores pasados, datos oficiales actualizados." imgsrc="src/assets/img/hero/acercahero.jpg" id="titulo" />
+      <MiniHero titulo="Historial de valor del dolar" descripcion="Archivo histórico (7 días) del tipo de cambio de referencia. Consulta valores pasados, datos oficiales actualizados." imgsrc="a" id="titulo" />
 
       <p className="text-text-primary flex justify-center font-thin text-2xl m-20">{fecha}</p>
 

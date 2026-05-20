@@ -39,7 +39,6 @@ export default function AdminHeader({title, desc}){
 
                     )}
 
-
                     <div className="text-text-primary border border-solid border-bg-120/70 bg-bg hover:bg-bg-110 cursor-pointer transition p-2 rounded-md">
                         <HashLink to="/">
                             <Undo2 className="h-6 w-6"/>

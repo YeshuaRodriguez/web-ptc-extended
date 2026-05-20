@@ -3,6 +3,9 @@ import { motion, AnimatePresence } from "framer-motion"
 import { ShineCard } from "./ShineCard"
 import { fadeUp } from "../animations"
 import { ShineCardInverse } from "./ShineCardInverse"
+import boxesPosImg from "../../assets/img/boxes/boxespos.webp"
+import boxesAtmImg from "../../assets/img/boxes/boxesatm.webp"
+
 
 const MotionImg = motion.img
 
@@ -42,7 +45,7 @@ export default function BoxesSection() {
 
       {/* col 1, row 1 */}
       <MotionImg
-        src="https://images.pexels.com/photos/5239818/pexels-photo-5239818.jpeg"
+        src={boxesPosImg}
         alt="img-1"
         style={{ gridColumn: "1", gridRow: "1" }}
         className="rounded-2xl object-cover w-full h-full hover:scale-105 transition"
@@ -99,7 +102,7 @@ export default function BoxesSection() {
 
       {/* col 3, row 3 */}
       <MotionImg
-        src="https://i.imgur.com/7RHGUXM.jpeg"
+        src={boxesAtmImg}
         alt="img-2"
         style={{ gridColumn: "3", gridRow: "3" }}
         className="rounded-2xl object-cover w-full h-full hover:scale-105 transition"
