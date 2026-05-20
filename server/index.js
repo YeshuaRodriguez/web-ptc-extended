@@ -8,6 +8,7 @@
   import { auth } from "express-oauth2-jwt-bearer";
   import { auditLog } from './audit.js'
   import fs from 'fs'
+  import path from 'path'
 
   const PORT = process.env.PORT || 3001;
 
@@ -20,13 +21,25 @@
     issuerBaseURL: `https://${process.env.AUTH0_DOMAIN}`,
   })
 
+  const requirePermission = (permission) => (req, res, next) => {
+    const permissions = req.auth?.payload?.permissions ?? []
+    if (!permissions.includes(permission)) {
+      return res.status(403).json({ error: "No autorizado" })
+    }
+    next()
+  }
+
 
   const app = express();
 
   const allowedOrigins = [
-  'http://localhost:5173',
-  'https://yeshuarodriguez.github.io'
-]
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'https://yeshuarodriguez.github.io',
+    ...(process.env.CORS_ALLOWED_ORIGINS
+      ? process.env.CORS_ALLOWED_ORIGINS.split(',').map((o) => o.trim()).filter(Boolean)
+      : [])
+  ]
 
 app.use(cors({
   origin: function(origin, callback) {
