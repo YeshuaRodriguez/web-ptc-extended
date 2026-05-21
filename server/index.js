@@ -742,10 +742,13 @@ app.delete("/api/tickets/:id", checkJwt, requirePermission("delete:tickets"), as
   const PAGE_SIZE = 15
   const analyticsCache = new Map()
 
-  app.get('/api/analytics/resumen', checkJwt, async (req, res) => {
-    try {
-      console.log(req.auth)
-      const [response] = await analyticsClient.runReport({
+app.get('/api/analytics/resumen', checkJwt, async (req, res) => {
+  try {
+    const analyticsClient = new BetaAnalyticsDataClient({
+      credentials: JSON.parse(process.env.GA_SERVICE_ACCOUNT)
+    })
+    
+    const [response] = await analyticsClient.runReport({
         property: `properties/${PROPERTY_ID}`,
         dateRanges: [{ startDate: '7daysAgo', endDate: 'today' }],
         metrics: [
