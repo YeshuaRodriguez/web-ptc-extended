@@ -58,7 +58,7 @@ export default function AdminMails() {
                 setMails(Array.isArray(data) ? data : [])
             } catch (e) {
                 console.error(e)
-                setError("Error de conexión con el servidor")
+                setError("Error de conexion con el servidor")
                 setMails([])
             } finally {
                 setLoading(false)
@@ -101,7 +101,7 @@ export default function AdminMails() {
                 setSelectedMailDetail(data)
             } catch (e) {
                 console.error(e)
-                setMailDetailError("Error de conexión con el servidor")
+                setMailDetailError("Error de conexion con el servidor")
             } finally {
                 setMailDetailLoading(false)
             }
@@ -115,8 +115,9 @@ export default function AdminMails() {
     const getEstado = (mail) => {
         const override = estadoOverride[mail.id]
         if (override) return override
+        if (mail.estado_local) return mail.estado_local
 
-        const estadoRaw = mail.last_event || mail.status || "—"
+        const estadoRaw = mail.last_event || mail.status || "-"
         if (estadoRaw === "delivered") return "recibido"
         return estadoRaw
     }
@@ -130,7 +131,47 @@ export default function AdminMails() {
         }
         return "text-warning-primary-110 bg-warning-primary-70/20"
     }
+
     const canReplyMails = hasPermission("reply:mails")
+
+    const persistMailStatus = async (mailId, checked) => {
+        const token = await getAccessTokenSilently({
+            authorizationParams: {
+                audience: import.meta.env.VITE_AUTH0_AUDIENCE
+            }
+        })
+
+        const estado = checked ? "respondido" : "recibido"
+
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/mails/${encodeURIComponent(mailId)}/status`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({ estado })
+        })
+
+        const data = await res.json()
+        if (!res.ok) {
+            throw new Error(data?.error || "Error actualizando estado del correo")
+        }
+
+        setEstadoOverride((prev) => ({
+            ...prev,
+            [mailId]: estado
+        }))
+
+        setMails((prev) =>
+            prev.map((mail) =>
+                mail.id === mailId ? { ...mail, estado_local: estado } : mail
+            )
+        )
+
+        setSelectedMail((prev) =>
+            prev?.id === mailId ? { ...prev, estado_local: estado } : prev
+        )
+    }
 
     const getReplyToEmail = () => {
         const candidates = [
@@ -143,7 +184,6 @@ export default function AdminMails() {
         const raw = candidates[0]
         if (!raw) return ""
 
-        // Soporta formatos como: "Nombre <correo@dominio.com>"
         const match = String(raw).match(/<([^>]+)>/)
         return match ? match[1].trim() : String(raw).trim()
     }
@@ -194,11 +234,11 @@ export default function AdminMails() {
                                     <TableCell>
                                         {mail.created_at
                                             ? new Date(mail.created_at).toLocaleString("es-HN")
-                                            : "—"}
+                                            : "-"}
                                     </TableCell>
-                                    <TableCell>{mail.from || "—"}</TableCell>
-                                    <TableCell>{Array.isArray(mail.to) ? mail.to.join(", ") : (mail.to || "—")}</TableCell>
-                                    <TableCell>{mail.subject || "—"}</TableCell>
+                                    <TableCell>{mail.from || "-"}</TableCell>
+                                    <TableCell>{Array.isArray(mail.to) ? mail.to.join(", ") : (mail.to || "-")}</TableCell>
+                                    <TableCell>{mail.subject || "-"}</TableCell>
                                     <TableCell>
                                         <span className={`inline-flex px-2 py-1 rounded-md text-xs font-medium ${getEstadoClassName(estado)}`}>
                                             {estado}
@@ -209,11 +249,14 @@ export default function AdminMails() {
                                             type="checkbox"
                                             className="cursor-pointer accent-brand-primary"
                                             checked={estado === "respondido"}
-                                            onChange={(e) => {
-                                                setEstadoOverride((prev) => ({
-                                                    ...prev,
-                                                    [mail.id]: e.target.checked ? "respondido" : "recibido"
-                                                }))
+                                            disabled={!canReplyMails}
+                                            onChange={async (e) => {
+                                                try {
+                                                    await persistMailStatus(mail.id, e.target.checked)
+                                                } catch (err) {
+                                                    console.error(err)
+                                                    setError(err.message || "Error de conexion con el servidor")
+                                                }
                                             }}
                                         />
                                     </TableCell>
@@ -250,12 +293,15 @@ export default function AdminMails() {
                                 type="checkbox"
                                 className="cursor-pointer accent-brand-primary"
                                 checked={selectedMail ? getEstado(selectedMail) === "respondido" : false}
-                                onChange={(e) => {
+                                disabled={!canReplyMails}
+                                onChange={async (e) => {
                                     if (!selectedMail) return
-                                    setEstadoOverride((prev) => ({
-                                        ...prev,
-                                        [selectedMail.id]: e.target.checked ? "respondido" : "recibido"
-                                    }))
+                                    try {
+                                        await persistMailStatus(selectedMail.id, e.target.checked)
+                                    } catch (err) {
+                                        console.error(err)
+                                        setMailDetailError(err.message || "Error de conexion con el servidor")
+                                    }
                                 }}
                             />
                             Recibido / Respondido

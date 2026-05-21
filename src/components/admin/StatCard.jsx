@@ -1,6 +1,6 @@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
-export default function StatCard({ title, value, subtitle, subtitleType, compareValue, invertLogic = "neutral", tooltip }) {
+export default function StatCard({ title, value, subtitle, subtitleType, compareValue, invertLogic = false, tooltip }) {
 
     const getSubtitleType = () => {
     if (compareValue === undefined || compareValue === null) return "neutral"

@@ -62,6 +62,26 @@ app.use(express.json())
   //------CORREOS----------
 
   const resend = new Resend(process.env.RESEND_API_KEY);
+  const mailsStateDir = path.join(process.cwd(), "server", "mails")
+  const mailsStatePath = path.join(mailsStateDir, "mails-status.json")
+
+  function readMailsState() {
+    try {
+      if (!fs.existsSync(mailsStatePath)) return {}
+      const raw = fs.readFileSync(mailsStatePath, "utf-8")
+      const parsed = JSON.parse(raw)
+      return parsed && typeof parsed === "object" ? parsed : {}
+    } catch {
+      return {}
+    }
+  }
+
+  function writeMailsState(state) {
+    if (!fs.existsSync(mailsStateDir)) {
+      fs.mkdirSync(mailsStateDir, { recursive: true })
+    }
+    fs.writeFileSync(mailsStatePath, JSON.stringify(state, null, 2))
+  }
 
   const emailLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutos
@@ -179,7 +199,14 @@ app.use(express.json())
       })
     }
 
-    res.json(Array.isArray(data?.data) ? data.data : [])
+    const mails = Array.isArray(data?.data) ? data.data : []
+    const localState = readMailsState()
+    const merged = mails.map((mail) => ({
+      ...mail,
+      estado_local: localState[mail.id]?.estado ?? null
+    }))
+
+    res.json(merged)
   } catch (error) {
     console.error("Error obteniendo emails de Resend:", error)
     res.status(500).json({ error: "Error interno del servidor" })
@@ -198,9 +225,47 @@ app.use(express.json())
       return res.status(response.status).json({ error: data.message })
     }
 
-    res.json(data)
+    const localState = readMailsState()
+    const estadoLocal = localState[req.params.id]?.estado ?? null
+
+    res.json({
+      ...data,
+      estado_local: estadoLocal
+    })
   } catch (error) {
     res.status(500).json({ error: "Error obteniendo detalle del correo" })
+  }
+})
+
+app.patch("/api/mails/:id/status", checkJwt, requirePermission("reply:mails"), async (req, res) => {
+  try {
+    const { id } = req.params
+    const { estado } = req.body
+
+    const estadosValidos = ["recibido", "respondido"]
+    if (!estadosValidos.includes(estado)) {
+      return res.status(400).json({ error: "estado invalido" })
+    }
+
+    const state = readMailsState()
+    state[id] = {
+      estado,
+      updated_at: new Date().toISOString(),
+      updated_by: req.auth?.payload?.sub ?? "unknown"
+    }
+
+    writeMailsState(state)
+
+    auditLog({
+      accion: "ACTUALIZAR_ESTADO_MAIL",
+      realizadoPor: req.auth.payload.sub,
+      detalle: { mailId: id, estado }
+    })
+
+    res.json({ id, estado })
+  } catch (error) {
+    console.error("Error actualizando estado de mail:", error)
+    res.status(500).json({ error: "Error interno del servidor" })
   }
 })
 

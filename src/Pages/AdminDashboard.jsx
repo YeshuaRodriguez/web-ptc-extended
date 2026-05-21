@@ -19,6 +19,7 @@ import { useAuth0 } from "@auth0/auth0-react"
 export default function AdminDashboard() {
 
     const { getAccessTokenSilently } = useAuth0()
+    const apiBaseUrl = import.meta.env.VITE_API_URL
 
     const [analytics, setAnalytics] = useState(null)
     const [historial, setHistorial] = useState([])
@@ -27,6 +28,23 @@ export default function AdminDashboard() {
     const [eventos, setEventos] = useState([])
     const [dispositivos, setDispositivos] = useState([])
     const [horas, setHoras] = useState([])
+
+    const percentageChange = (current, previous) => {
+        if (current == null || previous == null || previous === 0) return null
+        return Math.round(((current - previous) / previous) * 100)
+    }
+
+    const formatChange = (pct) => {
+        if (pct == null) return "—"
+        return `${pct > 0 ? "+" : ""}${pct}% vs ayer`
+    }
+
+    const durationToSeconds = (duration) => {
+        if (!duration || typeof duration !== "string") return null
+        const match = duration.match(/(\d+)m\s+(\d+)s/)
+        if (!match) return null
+        return Number(match[1]) * 60 + Number(match[2])
+    }
 
     useEffect(() => {
         const fetchData = async () => {
@@ -49,13 +67,13 @@ export default function AdminDashboard() {
                     })
 
             const [resumen, historial, paginas, ubicacion, eventos, dispositivos, horas] = await Promise.all([
-                fetchAnalytics("https://web-ptc-extended.onrender.com/api/analytics/resumen"),
-                fetchAnalytics("https://web-ptc-extended.onrender.com/api/analytics/historial"),
-                fetchAnalytics("https://web-ptc-extended.onrender.com/api/analytics/paginas"),
-                fetchAnalytics("https://web-ptc-extended.onrender.com/api/analytics/ubicacion"),
-                fetchAnalytics("https://web-ptc-extended.onrender.com/api/analytics/eventos"),
-                fetchAnalytics("https://web-ptc-extended.onrender.com/api/analytics/dispositivos"),
-                fetchAnalytics("https://web-ptc-extended.onrender.com/api/analytics/horas"),
+                fetchAnalytics(`${apiBaseUrl}/api/analytics/resumen`),
+                fetchAnalytics(`${apiBaseUrl}/api/analytics/historial`),
+                fetchAnalytics(`${apiBaseUrl}/api/analytics/paginas`),
+                fetchAnalytics(`${apiBaseUrl}/api/analytics/ubicacion`),
+                fetchAnalytics(`${apiBaseUrl}/api/analytics/eventos`),
+                fetchAnalytics(`${apiBaseUrl}/api/analytics/dispositivos`),
+                fetchAnalytics(`${apiBaseUrl}/api/analytics/horas`),
             ])
 
             setAnalytics(resumen)
@@ -68,7 +86,7 @@ export default function AdminDashboard() {
         }
 
         fetchData().catch(err => console.error("Error fetching analytics:", err))
-    }, [getAccessTokenSilently])
+    }, [getAccessTokenSilently, apiBaseUrl])
 
     //const reboteHoy = 43
     //const reboteAyer = 46
@@ -100,7 +118,7 @@ export default function AdminDashboard() {
     const ubicacionVisitasSes2 = ubicacion[1]?.sesiones ?? "_"
     const ubicacionVisitasSes3 = ubicacion[2]?.sesiones ?? "_"
 
-const paginaMasVisitadaTop = paginas[0]?.pagina === "/" ? "Home" : (paginas[0]?.pagina ?? "_");
+const paginaMasVisitadaTop = paginas[0]?.pagina === "/web-ptc-extended/" ? "Home" : (paginas[0]?.pagina ?? "_");
 const paginaMasVisitada1 = paginaMasVisitadaTop ?? "_"
 const paginaMasVisitada2 = paginas[1]?.pagina ?? "_"
 const paginaMasVisitada3 = paginas[2]?.pagina ?? "_"
@@ -119,26 +137,26 @@ const evento2Count = eventos[1]?.count?? "_"
 const evento3Count = eventos[2]?.count?? "_"
 
 const diffPageViews = hoy && ayer ? hoy.pageViews - ayer.pageViews : null
-const pctPageViews = diffPageViews && ayer ? Math.round((diffPageViews / ayer.pageViews) * 100) : null
-    
-const tiempoPromedio = analytics?.avgSessionDuration ?? "—"
+const pctPageViews = percentageChange(hoy?.pageViews, ayer?.pageViews)
 
-const tiempoPromedioHoyString = hoy?.avgSessionDuration?.match(/\d+/g) ?? null
-const tiempoPromedioHoyInt = tiempoPromedioHoyString ? tiempoPromedioHoyString.map(Number) : null
-
-const tiempoPromedioAyerString = ayer?.avgSessionDuration?.match(/\d+/g) ?? null
-const tiempoPromedioAyerInt = tiempoPromedioAyerString ? tiempoPromedioAyerString.map(Number) : null
+const tiempoPromedioHoySeg = durationToSeconds(hoy?.avgSessionDuration)
+const tiempoPromedioAyerSeg = durationToSeconds(ayer?.avgSessionDuration)
+const diffTiempoPromedio = tiempoPromedioHoySeg != null && tiempoPromedioAyerSeg != null
+  ? tiempoPromedioHoySeg - tiempoPromedioAyerSeg
+  : null
+const pctTiempoPromedio = percentageChange(tiempoPromedioHoySeg, tiempoPromedioAyerSeg)
 
 const tasaRebote = analytics?.bounceRate ?? "—"
 const tasaReboteHoy = hoy?.bounceRate ?? null
 const tasaReboteAyer = ayer?.bounceRate ?? null
 const diffTasaRebote = tasaReboteHoy != null && tasaReboteAyer != null ? tasaReboteHoy - tasaReboteAyer : null
+const pctTasaRebote = percentageChange(tasaReboteHoy, tasaReboteAyer)
 
 const usuariosNuevos = analytics?.totalUsers ?? "—"
 const usuariosNuevosHoy = hoy?.totalUsers ?? null
 const usuariosNuevosAyer = ayer?.totalUsers ?? null
 const diffUsuarios = usuariosNuevosHoy != null && usuariosNuevosAyer != null ? usuariosNuevosHoy - usuariosNuevosAyer : null
-
+const pctUsuarios = percentageChange(usuariosNuevosHoy, usuariosNuevosAyer)
 
 
 
@@ -156,7 +174,7 @@ const diffUsuarios = usuariosNuevosHoy != null && usuariosNuevosAyer != null ? u
                         <StatCard
                         title="Vistas totales"
                         value={analytics?.pageViews?.toLocaleString() ?? "—"}
-                        subtitle={pctPageViews != null ? `${pctPageViews > 0 ? "+" : ""}${pctPageViews}% vs ayer` : "—"}
+                        subtitle={formatChange(pctPageViews)}
                         compareValue={diffPageViews}
                         tooltip="Total de páginas vistas en los últimos 7 días."
                         />
@@ -176,8 +194,8 @@ const diffUsuarios = usuariosNuevosHoy != null && usuariosNuevosAyer != null ? u
                         <StatCard
                         title="Tiempo Promedio"
                         value={`${analytics?.avgSessionDuration?.toLocaleString()??"_"}`}
-                        subtitle={`${tiempoPromedioHoyInt > tiempoPromedioAyerInt ? "+" : ""}${Math.round((tiempoPromedioHoyInt - tiempoPromedioAyerInt) / tiempoPromedioAyerInt * 100)}% vs ayer`}
-                        compareValue={tiempoPromedioHoyInt - tiempoPromedioAyerInt}
+                        subtitle={formatChange(pctTiempoPromedio)}
+                        compareValue={diffTiempoPromedio}
                         tooltip="Promedio de tiempo de los usuarios activos los últimos 7 días."
                         />
                     </TooltipProvider>
@@ -186,7 +204,7 @@ const diffUsuarios = usuariosNuevosHoy != null && usuariosNuevosAyer != null ? u
                         <StatCard
                         title="Tasa de Rebote"
                         value={`${tasaRebote}%`}
-                        subtitle={`${tasaReboteHoy > tasaReboteAyer ? "+" : ""}${Math.round((tasaReboteHoy - tasaReboteAyer) / tasaReboteAyer * 100)}% vs ayer`}
+                        subtitle={formatChange(pctTasaRebote)}
                         compareValue={diffTasaRebote}
                         invertLogic={true}
                         tooltip="Porcentaje de usuarios que no interactúan en la página hoy."
@@ -197,7 +215,7 @@ const diffUsuarios = usuariosNuevosHoy != null && usuariosNuevosAyer != null ? u
                         <StatCard
                         title="Usuarios Nuevos"
                         value={`${usuariosNuevos}`}
-                        subtitle={`${usuariosNuevosHoy > usuariosNuevosAyer ? "+" : ""}${Math.round((usuariosNuevosHoy - usuariosNuevosAyer) / usuariosNuevosAyer * 100)}% vs ayer`}
+                        subtitle={formatChange(pctUsuarios)}
                         compareValue={diffUsuarios}
                         tooltip="Total de usuarios que no habáin ingresado anteriormente hoy."
                         />
@@ -277,13 +295,7 @@ const diffUsuarios = usuariosNuevosHoy != null && usuariosNuevosAyer != null ? u
 
                         </div>
                     </div>
-                    <div className="flex flex-col gap-4 w-full">
-                        <h1 className="font-bold text-xl text-text-primary">Trafico por hora del día</h1>
-                        <div className="bg-white shadow-md text-gray-300 rounded-lg p-12">
-                            <h1 className="text-2xl">Placeholder gráfico</h1>
-                            <ChartSpline />
-                        </div>
-                    </div>
+
                 </section>
 
             </section>
@@ -291,3 +303,4 @@ const diffUsuarios = usuariosNuevosHoy != null && usuariosNuevosAyer != null ? u
     )
 
 }
+
