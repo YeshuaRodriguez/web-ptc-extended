@@ -789,6 +789,31 @@ app.delete("/api/tickets/:id", checkJwt, requirePermission("delete:tickets"), as
     }
   })
 
+  app.get('/api/analytics/test', async (req, res) => {
+  try {
+    const creds = JSON.parse(process.env.GA_SERVICE_ACCOUNT)
+    const propertyId = process.env.GA_PROPERTY_ID
+    
+    console.log('client_email:', creds.client_email)
+    console.log('property_id:', propertyId)
+    console.log('private_key_start:', creds.private_key?.substring(0, 50))
+    
+    const [response] = await analyticsClient.runReport({
+      property: `properties/${propertyId}`,
+      dateRanges: [{ startDate: '7daysAgo', endDate: 'today' }],
+      metrics: [{ name: 'totalUsers' }],
+    })
+    
+    res.json({ success: true, rows: response.rows })
+  } catch (error) {
+    res.json({ 
+      error: error.message, 
+      code: error.code,
+      details: error.details 
+    })
+  }
+})
+
   //DATOS HISTORICOS FILTRADOS POR LOS ULTIMOS 7 DÍAS
 
   app.get('/api/analytics/historial', checkJwt, async (req, res) => {
