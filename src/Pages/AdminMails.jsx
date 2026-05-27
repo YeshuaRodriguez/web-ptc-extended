@@ -152,9 +152,16 @@ export default function AdminMails() {
             body: JSON.stringify({ estado })
         })
 
-        const data = await res.json()
+        const raw = await res.text()
+        let data = null
+        try {
+            data = raw ? JSON.parse(raw) : null
+        } catch {
+            data = null
+        }
+
         if (!res.ok) {
-            throw new Error(data?.error || "Error actualizando estado del correo")
+            throw new Error(data?.error || `Error actualizando estado del correo (${res.status})`)
         }
 
         setEstadoOverride((prev) => ({
