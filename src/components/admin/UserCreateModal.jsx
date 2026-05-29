@@ -8,7 +8,7 @@ import {
 import { Input } from "../ui/input"
 import { useAuth0 } from "@auth0/auth0-react"
 
-export default function UserCreateModal({ open, onOpenChange, token }) {
+export default function UserCreateModal({ open, onOpenChange }) {
 
     const [name, setName] = useState("")
     const [email, setEmail] = useState("")
@@ -18,10 +18,19 @@ export default function UserCreateModal({ open, onOpenChange, token }) {
     
     const { getAccessTokenSilently } = useAuth0()
 
+    const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
     const handleSubmit = async (e) => {
     e.preventDefault()
-    setLoading(true)
     setError("")
+
+    if (!name.trim()) { setError("El nombre es obligatorio"); return }
+    if (!email.trim()) { setError("El correo es obligatorio"); return }
+    if (!EMAIL_REGEX.test(email.trim())) { setError("Ingrese un correo válido"); return }
+    if (!password) { setError("La contraseña es obligatoria"); return }
+    if (password.length < 8) { setError("La contraseña debe tener al menos 8 caracteres"); return }
+
+    setLoading(true)
 
     try {
         const token = await getAccessTokenSilently({
@@ -30,7 +39,7 @@ export default function UserCreateModal({ open, onOpenChange, token }) {
             }
         })
 
-        const response = await fetch("https://web-ptc-extended.onrender.com/api/users", {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -79,6 +88,7 @@ export default function UserCreateModal({ open, onOpenChange, token }) {
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                         />
+                        <p className="text-xs italic text-text-primary/50">Obligatorio</p>
                     </div>
 
                     <div className="flex flex-col gap-2 p-2">
@@ -89,6 +99,7 @@ export default function UserCreateModal({ open, onOpenChange, token }) {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
+                        <p className="text-xs italic text-text-primary/50">Obligatorio · Formato: correo@ejemplo.com</p>
                     </div>
 
                     <div className="flex flex-col gap-2 p-2">
@@ -100,6 +111,7 @@ export default function UserCreateModal({ open, onOpenChange, token }) {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
+                        <p className="text-xs italic text-text-primary/50">Obligatorio · Mín. 8 caracteres</p>
                     </div>
 
 

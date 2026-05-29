@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input"
 //web-ptc-extended\src\components\ui\input.jsx
 //web-ptc-extended\src\components\admin\roles\RolCreateModal.jsx
 
-export default function RolCreateModal({open, onOpenChange, token}){
+export default function RolCreateModal({open, onOpenChange}){
 
         const [name, setName] = useState("")
     const [description, setDescription] = useState("")
@@ -23,8 +23,12 @@ export default function RolCreateModal({open, onOpenChange, token}){
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        setLoading(true)
         setError("")
+
+        if (!name.trim()) { setError("El nombre del rol es obligatorio"); return }
+        if (!description.trim()) { setError("La descripción es obligatoria"); return }
+
+        setLoading(true)
 
         try {
             const token = await getAccessTokenSilently({
@@ -33,7 +37,7 @@ export default function RolCreateModal({open, onOpenChange, token}){
                 }
             })
 
-            const response = await fetch("https://web-ptc-extended.onrender.com/api/roles", {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/roles`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -81,6 +85,7 @@ export default function RolCreateModal({open, onOpenChange, token}){
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                         />
+                        <p className="text-xs italic text-text-primary/50">Obligatorio</p>
                     </div>
 
                     <div className="flex flex-col gap-2 p-2">
@@ -91,6 +96,7 @@ export default function RolCreateModal({open, onOpenChange, token}){
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                         />
+                        <p className="text-xs italic text-text-primary/50">Obligatorio</p>
                     </div>
 
                     {error && (

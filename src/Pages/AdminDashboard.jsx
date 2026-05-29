@@ -88,35 +88,17 @@ export default function AdminDashboard() {
         fetchData().catch(err => console.error("Error fetching analytics:", err))
     }, [getAccessTokenSilently, apiBaseUrl])
 
-    //const reboteHoy = 43
-    //const reboteAyer = 46
-    //const visitasHoy = 2
-    //const visitasAyer = 2
-    //const paginaMasVisitadaMock = "Home"
-    //const tiempoPromedioMock = 5
-    //const tiempoPromedioMockAyer = 3
-    //const tasaReboteMock = 63
-    //const tasaReboteMockAyer = 50
-    //const usuariosNuevosMock = 10
-    //const usuariosNuevosMockAyer = 5
-    //const top1 = "aaa"
-    //const top2 = "aaa"
-    //const top3 = "aaa"
-    //const stat1 = 123
-    //const stat2 = 123
-    // const stat3 = 123
 
+ const hoy = historial.length > 0 ? historial[historial.length - 1] : null
+ const ayer = historial.length > 1 ? historial[historial.length - 2] : null
 
-    const hoy = historial.length > 0 ? historial[historial.length - 1] : null
-    const ayer = historial.length > 1 ? historial[historial.length - 2] : null
+const ubicacionVisitas1 = ubicacion[0]?.pais ?? "_"
+const ubicacionVisitas2 = ubicacion[1]?.pais ?? "_"
+const ubicacionVisitas3 = ubicacion[2]?.pais ?? "_"
 
-    const ubicacionVisitas1 = ubicacion[0]?.pais ?? "_"
-    const ubicacionVisitas2 = ubicacion[1]?.pais ?? "_"
-    const ubicacionVisitas3 = ubicacion[2]?.pais ?? "_"
-
-    const ubicacionVisitasSes1 = ubicacion[0]?.sesiones ?? "_"
-    const ubicacionVisitasSes2 = ubicacion[1]?.sesiones ?? "_"
-    const ubicacionVisitasSes3 = ubicacion[2]?.sesiones ?? "_"
+const ubicacionVisitasSes1 = ubicacion[0]?.sesiones ?? "_"
+const ubicacionVisitasSes2 = ubicacion[1]?.sesiones ?? "_"
+const ubicacionVisitasSes3 = ubicacion[2]?.sesiones ?? "_"
 
 const paginaMasVisitadaTop = paginas[0]?.pagina === "/web-ptc-extended/" ? "Home" : (paginas[0]?.pagina ?? "_");
 const paginaMasVisitada1 = paginaMasVisitadaTop ?? "_"
@@ -158,16 +140,12 @@ const usuariosNuevosAyer = ayer?.totalUsers ?? null
 const diffUsuarios = usuariosNuevosHoy != null && usuariosNuevosAyer != null ? usuariosNuevosHoy - usuariosNuevosAyer : null
 const pctUsuarios = percentageChange(usuariosNuevosHoy, usuariosNuevosAyer)
 
-
-
     return (
         <>
 
             <AdminHeader title="Analíticas" desc="Analíticas" />
 
-
             <section className="flex flex-col m-6 gap-6">
-
 
                 <section className="mx-4 flex flex-col md:flex-row gap-8">
                     <TooltipProvider>
@@ -225,14 +203,12 @@ const pctUsuarios = percentageChange(usuariosNuevosHoy, usuariosNuevosAyer)
 
 
                 <section className="flex md:flex-row flex-col mx-5 gap-4">
-
                     <div className="w-full flex flex-col gap-4">
                         <h1 className="font-bold text-xl text-text-primary">Visitas los últimos 7 días</h1>
                         <div className="text-gray-300 shadow-md bg-white p-10 rounded-lg flex flex-row gap-2 justify-center border-solid border-1 border-bg-110 hover:border-bg-120 hover:scale-102 transition min-h-100">
                             <SevenDaysViewsGraph historial={historial}/>
                         </div>
                     </div>
-
                     <div className="w-full flex flex-col gap-4">
                         <h1 className="font-bold text-xl text-text-primary">Dispositivos</h1>
                         <div className="text-gray-300 shadow-md bg-white p-10 rounded-lg flex flex-col gap-2 justify-center border-solid border-1 border-bg-110 hover:border-bg-120 hover:scale-102 transition min-h-100">
@@ -243,14 +219,8 @@ const pctUsuarios = percentageChange(usuariosNuevosHoy, usuariosNuevosAyer)
                                 <span className="text-black/50 flex items-center gap-2"><span className="h-3 w-3 bg-[#8eacc8]"></span>Tablet</span>
                             </div>
                         </div>
-
                     </div>
-
-
                 </section>
-
-
-
 
                 <section className="flex flex-col gap-2 mx-6">
                     <h1 className="font-bold text-xl text-text-primary">Páginas Más Visitadas</h1>
@@ -281,23 +251,17 @@ const pctUsuarios = percentageChange(usuariosNuevosHoy, usuariosNuevosAyer)
                             <hr className="border-solid border-1 border-brand-accent" />
                             <StatList top1={eventoTop} top2={evento2} top3={evento3} stat1={eventoTopCount} stat2={evento2Count} stat3={evento3Count}/>
                         </div>
-
                     </div>
-
                 </section>
 
                 <section className="flex gap-4 md:flex-row flex-col mx-4">
                     <div className="flex flex-col gap-4 w-full">
                         <h1 className="font-bold text-xl text-text-primary">Trafico por hora del día</h1>
                         <div className="bg-white shadow-md text-gray-300 rounded-lg p-12">
-
                             <ViewsPorHora horas={horas}/>
-
                         </div>
                     </div>
-
                 </section>
-
             </section>
         </>
     )

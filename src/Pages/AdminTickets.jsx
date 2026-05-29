@@ -41,6 +41,10 @@ export default function AdminTickets() {
   const [actionLoading, setActionLoading] = useState(false)
   const [actionError, setActionError] = useState(null)
 
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [ticketToDelete, setTicketToDelete] = useState(null)
+  const [deleteError, setDeleteError] = useState(null)
+
   const canCreateTickets = hasPermission("create:tickets")
   const canUpdateTicketStatus = hasPermission("update:ticket_status")
   const canDeleteTickets = hasPermission("delete:tickets")
@@ -221,9 +225,11 @@ export default function AdminTickets() {
     }
   }
 
-  const handleDeleteTicket = async (ticketId) => {
-    if (!canDeleteTickets) return
+  const handleDeleteTicket = async () => {
+    if (!canDeleteTickets || !ticketToDelete) return
+    const ticketId = ticketToDelete.id
     try {
+      setDeleteError(null)
       const token = await getAccessTokenSilently({
         authorizationParams: {
           audience: import.meta.env.VITE_AUTH0_AUDIENCE
@@ -239,7 +245,7 @@ export default function AdminTickets() {
 
       const data = await res.json()
       if (!res.ok) {
-        setError(data?.error || "Error eliminando ticket")
+        setDeleteError(data?.error || "Error eliminando ticket")
         return
       }
 
@@ -250,9 +256,11 @@ export default function AdminTickets() {
         return next
       })
       if (selectedTicket?.id === ticketId) setSelectedTicket(null)
+      setDeleteConfirmOpen(false)
+      setTicketToDelete(null)
     } catch (e) {
       console.error(e)
-      setError("Error de conexion con el servidor")
+      setDeleteError("Error de conexion con el servidor")
     }
   }
 
@@ -328,7 +336,11 @@ export default function AdminTickets() {
                     {canDeleteTickets && (
                       <TableCell onClick={(e) => e.stopPropagation()}>
                         <button
-                          onClick={() => handleDeleteTicket(ticket.id)}
+                          onClick={() => {
+                            setDeleteError(null)
+                            setTicketToDelete(ticket)
+                            setDeleteConfirmOpen(true)
+                          }}
                           className="p-1 rounded-sm text-text-primary cursor-pointer hover:text-warning-primary"
                           aria-label={`Eliminar ${ticket.id}`}
                         >
@@ -430,6 +442,33 @@ export default function AdminTickets() {
                 Cerrar
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleteConfirmOpen} onOpenChange={(open) => { if (!open) { setDeleteConfirmOpen(false); setTicketToDelete(null); setDeleteError(null) } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-rose-500">¿Quiere eliminar este ticket?</DialogTitle>
+          </DialogHeader>
+          <p className="text-text-primary">
+            Se eliminará el ticket <span className="font-bold">{ticketToDelete?.titulo || ticketToDelete?.id}</span> de forma permanente.
+          </p>
+          {deleteError && <p className="text-sm text-red-500">{deleteError}</p>}
+          <div className="flex justify-end gap-2 pt-2">
+            <Button
+              className="bg-rose-600 cursor-pointer hover:bg-rose-700 text-white"
+              onClick={handleDeleteTicket}
+            >
+              Aceptar
+            </Button>
+            <Button
+              variant="outline"
+              className="cursor-pointer"
+              onClick={() => { setDeleteConfirmOpen(false); setTicketToDelete(null); setDeleteError(null) }}
+            >
+              Cancelar
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

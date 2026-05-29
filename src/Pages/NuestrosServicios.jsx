@@ -1,6 +1,6 @@
 import MiniHero from "@/components/Layout/MiniHero"
-import { Diamond } from "lucide-react"
 import NuestrosServiciosOL from "@/components/NuestrosServiciosOL"
+import nuestrosServiciosHero from "@/assets/img/hero/nuestrosservicioshero.jpg"
 
 export default function NuestrosServicios(){
 
@@ -8,9 +8,9 @@ export default function NuestrosServicios(){
 
         <>
             <div id="titulo"></div>
-            <MiniHero titulo="Nuestros Servicios" descripcion="Descubre el portafolio de soluciones diseñadas para optimizar, asegurar y potenciar cada una de tus transacciones." imgsrc="https://i.imgur.com/fcEkcSt.jpeg"/>
+            <MiniHero titulo="Nuestros Servicios" descripcion="Descubre el portafolio de soluciones diseñadas para optimizar, asegurar y potenciar cada una de tus transacciones." imgsrc={nuestrosServiciosHero}/>
         
-            <div className="grid grid-cols-3 m-10 text-text-primary">
+            <div className="grid grid-cols-1 md:grid-cols-3 m-10 text-text-primary">
 
                     <NuestrosServiciosOL titulo="Comercial" items={[
                         'Prospectación de clientes',

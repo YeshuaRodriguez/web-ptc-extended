@@ -47,8 +47,7 @@ export default function BoxesSection() {
       <MotionImg
         src={boxesPosImg}
         alt="img-1"
-        style={{ gridColumn: "1", gridRow: "1" }}
-        className="rounded-2xl object-cover w-full h-full hover:scale-105 transition"
+        className="md:col-start-1 md:row-start-1 rounded-2xl object-cover w-full min-h-48 md:h-full hover:scale-105 transition"
         variants={fadeUp(0.6, 0)}
         initial="hidden"
         whileInView="visible"
@@ -56,7 +55,7 @@ export default function BoxesSection() {
       />
 
       {/* col 2, row 1 */}
-      <div style={{ gridColumn: "2", gridRow: "1" }} className="h-full">
+      <div className="md:col-start-2 md:row-start-1 md:h-full">
         <ShineCardInverse
           title={<AnimatedWord words={statWords} />}
           subtitle="Servimos a"
@@ -68,7 +67,7 @@ export default function BoxesSection() {
       </div>
 
       {/* col 3, rows 1-2 */}
-      <div style={{ gridColumn: "3", gridRow: "1 / 3" }} className="h-full">
+      <div className="md:col-start-3 md:row-start-1 md:row-span-2 md:h-full">
         <ShineCard
           title="POS"
           textSize="3xl"
@@ -79,7 +78,7 @@ export default function BoxesSection() {
       </div>
 
       {/* col 1, rows 2-3 */}
-      <div style={{ gridColumn: "1", gridRow: "2 / 4" }} className="h-full">
+      <div className="md:col-start-1 md:row-start-2 md:row-span-2 md:h-full">
         <ShineCard
           title="ATM"
           textSize="3xl"
@@ -90,7 +89,7 @@ export default function BoxesSection() {
       </div>
 
       {/* col 2, rows 2-3 */}
-      <div style={{ gridColumn: "2", gridRow: "2 / 4" }} className="h-full">
+      <div className="md:col-start-2 md:row-start-2 md:row-span-2 md:h-full">
         <ShineCard
           title="Tarjetas"
           textSize="3xl"
@@ -104,8 +103,7 @@ export default function BoxesSection() {
       <MotionImg
         src={boxesAtmImg}
         alt="img-2"
-        style={{ gridColumn: "3", gridRow: "3" }}
-        className="rounded-2xl object-cover w-full h-full hover:scale-105 transition"
+        className="md:col-start-3 md:row-start-3 rounded-2xl object-cover w-full min-h-48 md:h-full hover:scale-105 transition"
         variants={fadeUp(0.6, 0.5)}
         initial="hidden"
         whileInView="visible"

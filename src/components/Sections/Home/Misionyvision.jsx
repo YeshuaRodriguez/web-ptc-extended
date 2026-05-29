@@ -33,7 +33,7 @@ export default function Misionyvision() {
         className="absolute inset-0 w-full h-full object-cover z-0 opacity-70"
       />
 
-      {/* Contenido — se mueve MÁS (parece estar más al frente) */}
+      {/* Contenido — se mueve MÁS */}
       <motion.div
         style={{ y: contentY }}
         className="relative z-10 flex flex-col md:flex-row items-center justify-center w-full max-w-6xl mx-auto gap-12"

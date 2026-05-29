@@ -184,7 +184,7 @@ export default function AdminHistorial() {
                             size="sm"
                             onClick={() => handlePage(page - 1)}
                             disabled={!pagination.hasPrev || loading}
-                            className="cursor-pointer"
+                            className="cursor-pointer text-text-primary"
                         >
                             <ChevronLeft className="h-4 w-4" />
                         </Button>
@@ -193,7 +193,7 @@ export default function AdminHistorial() {
                             size="sm"
                             onClick={() => handlePage(page + 1)}
                             disabled={!pagination.hasNext || loading}
-                            className="cursor-pointer"
+                            className="cursor-pointer text-text-primary"
                         >
                             <ChevronRight className="h-4 w-4" />
                         </Button>

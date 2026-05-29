@@ -29,9 +29,6 @@ export default function ExportarExcelModal({ setExportarModal }) {
             const start = format(startDate, "yyyy-MM-dd")
             const end   = format(endDate,   "yyyy-MM-dd")
 
-            // Traemos todos los registros del rango — sin paginación
-            // Asumiendo que tu API acepta un page=all o un limit alto
-            // Ajusta esto según tu backend:
             const res = await fetch(
                 `${import.meta.env.VITE_API_URL}/api/analytics/historico?startDate=${start}&endDate=${end}&export=true`,
                 { headers: { Authorization: `Bearer ${token}` } }
@@ -44,7 +41,6 @@ export default function ExportarExcelModal({ setExportarModal }) {
                 return
             }
 
-            // Mapeamos las columnas al español para el Excel
             const rows = json.data.map(row => ({
                 "Fecha":             row.fecha,
                 "Visitas":           row.pageViews,
@@ -57,7 +53,6 @@ export default function ExportarExcelModal({ setExportarModal }) {
             const wb = XLSX.utils.book_new()
             XLSX.utils.book_append_sheet(wb, ws, "Historial")
 
-            // Ancho de columnas automático
             ws["!cols"] = [
                 { wch: 14 }, // Fecha
                 { wch: 10 }, // Visitas

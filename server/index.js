@@ -14,6 +14,7 @@
 
   dotenv.config();
 
+  //==================== INICIO: SEGURIDAD (JWT + PERMISOS) ====================
   //VERIFICACION TOKEN A LAS APIS
 
   const checkJwt = auth({
@@ -30,6 +31,8 @@
   }
 
 
+  //==================== FIN: SEGURIDAD (JWT + PERMISOS) ====================
+
   const app = express();
 
   const allowedOrigins = [
@@ -41,6 +44,7 @@
       : [])
   ]
 
+//==================== INICIO: CONFIG APP (CORS + JSON) ====================
 app.use(cors({
   origin: function(origin, callback) {
     // permitir requests sin origin (Postman, Render health check, etc)
@@ -58,13 +62,17 @@ app.use(cors({
 }))
 
 app.use(express.json())
+//==================== FIN: CONFIG APP (CORS + JSON) ====================
 
+  //==================== INICIO: MODULO CORREOS (RESEND + ESTADO LOCAL) ====================
   //------CORREOS----------
 
   const resend = new Resend(process.env.RESEND_API_KEY);
+  // Subproceso: persistencia local del estado de correos (recibido/respondido)
   const mailsStateDir = path.join(process.cwd(), "server", "mails")
   const mailsStatePath = path.join(mailsStateDir, "mails-status.json")
 
+  // Subproceso: lectura segura de estado local
   function readMailsState() {
     try {
       if (!fs.existsSync(mailsStatePath)) return {}
@@ -89,7 +97,7 @@ app.use(express.json())
     message: { error: 'Demasiados intentos, esperá 15 minutos.' }
   })
 
-
+  // Subproceso: envio de correo desde formulario (valida + sanitiza + envia)
   app.post("/send-email", emailLimiter, async (req, res) => {
     try {
       const { replyEmail, subject, message, name, phone } = req.body;
@@ -179,6 +187,7 @@ app.use(express.json())
     }
   });
 
+  // Subproceso: listado de correos desde Resend + merge con estado local
   app.get("/api/mails", checkJwt, async (req, res) => {
   try {
     const limitRaw = Number(req.query.limit)
@@ -213,6 +222,7 @@ app.use(express.json())
   }
 })
 
+  // Subproceso: detalle de un correo + estado local
   app.get("/api/mails/:id", checkJwt, async (req, res) => {
   try {
     const response = await fetch(`https://api.resend.com/emails/${req.params.id}`, {
@@ -237,6 +247,7 @@ app.use(express.json())
   }
 })
 
+// Subproceso: actualizar estado local de correo + auditoria
 app.patch("/api/mails/:id/status", checkJwt, requirePermission("reply:mails"), async (req, res) => {
   try {
     const { id } = req.params
@@ -269,6 +280,9 @@ app.patch("/api/mails/:id/status", checkJwt, requirePermission("reply:mails"), a
   }
 })
 
+//==================== FIN: MODULO CORREOS (RESEND + ESTADO LOCAL) ====================
+
+//==================== INICIO: MODULO TICKETS ====================
 app.get("/api/tickets", checkJwt, requirePermission("read:tickets"), async (req, res) => {
   try {
     const ticketsPath = path.join(process.cwd(), "server", "tickets", "tickets.json")
@@ -287,6 +301,7 @@ app.get("/api/tickets", checkJwt, requirePermission("read:tickets"), async (req,
   }
 })
 
+// Subproceso: crear ticket y asignar ID incremental
 app.post("/api/tickets", checkJwt, requirePermission("create:tickets"), async (req, res) => {
   try {
     const { titulo, descripcion } = req.body
@@ -337,6 +352,7 @@ app.post("/api/tickets", checkJwt, requirePermission("create:tickets"), async (r
   }
 })
 
+// Subproceso: cambiar estado de ticket con reglas de negocio
 app.patch("/api/tickets/:id", checkJwt, requirePermission("update:ticket_status"), async (req, res) => {
   try {
     const { id } = req.params
@@ -397,6 +413,7 @@ app.patch("/api/tickets/:id", checkJwt, requirePermission("update:ticket_status"
   }
 })
 
+// Subproceso: eliminar ticket por ID
 app.delete("/api/tickets/:id", checkJwt, requirePermission("delete:tickets"), async (req, res) => {
   try {
     const { id } = req.params
@@ -427,6 +444,9 @@ app.delete("/api/tickets/:id", checkJwt, requirePermission("delete:tickets"), as
 })
 
 
+//==================== FIN: MODULO TICKETS ====================
+
+  //==================== INICIO: MODULO BANCO CENTRAL ====================
   //-------API BANCO CENTRAL---------
 
   //TIPO DE CAMBIO
@@ -598,9 +618,12 @@ app.delete("/api/tickets/:id", checkJwt, requirePermission("delete:tickets"), as
 
 
 
+  //==================== FIN: MODULO BANCO CENTRAL ====================
+
+  //==================== INICIO: MODULO AUTH0 (USUARIOS + ROLES) ====================
   //--------API AUTH0---------
 
-
+  // Subproceso: listar usuarios desde Auth0 Management API
   app.get("/api/users", checkJwt, async (req, res) => {
     try {
       const tokenResponse = await fetch(`https://${process.env.AUTH0_DOMAIN}/oauth/token`, {
@@ -636,6 +659,7 @@ app.delete("/api/tickets/:id", checkJwt, requirePermission("delete:tickets"), as
 
   //CREAR USUARIOS POST
 
+  // Subproceso: crear usuario en Auth0
   app.post("/api/users", checkJwt, async (req, res) => {
     try {
       const { email, password, username } = req.body;
@@ -709,6 +733,7 @@ app.delete("/api/tickets/:id", checkJwt, requirePermission("delete:tickets"), as
 
   //ROLES READ
 
+  // Subproceso: listar roles de Auth0
   app.get("/api/roles", checkJwt, async (req, res) => {
     try {
       const tokenResponse = await fetch(`https://${process.env.AUTH0_DOMAIN}/oauth/token`, {
@@ -738,6 +763,7 @@ app.delete("/api/tickets/:id", checkJwt, requirePermission("delete:tickets"), as
 
   //POST ROLES
 
+  // Subproceso: crear rol en Auth0
   app.post("/api/roles", checkJwt, async (req, res) => {
     try {
       const { name, description } = req.body
@@ -790,10 +816,14 @@ app.delete("/api/tickets/:id", checkJwt, requirePermission("delete:tickets"), as
     }
   })
 
+  //==================== FIN: MODULO AUTH0 (USUARIOS + ROLES) ====================
+
+  //==================== INICIO: MODULO GOOGLE ANALYTICS ====================
   //--------GOOGLE ANALYTICS--------
 
   //DATOS GENERALES
 
+  // Subproceso: cliente GA4 y configuracion de cache
   const analyticsClient = new BetaAnalyticsDataClient({
     credentials: JSON.parse(process.env.GA_SERVICE_ACCOUNT)
 
@@ -807,6 +837,7 @@ app.delete("/api/tickets/:id", checkJwt, requirePermission("delete:tickets"), as
   const PAGE_SIZE = 15
   const analyticsCache = new Map()
 
+// Subproceso: resumen general de metricas (7 dias)
 app.get('/api/analytics/resumen', checkJwt, async (req, res) => {
   try {
     const analyticsClient = new BetaAnalyticsDataClient({
@@ -857,6 +888,7 @@ app.get('/api/analytics/resumen', checkJwt, async (req, res) => {
     }
   })
 
+// Subproceso: diagnostico de credenciales GA4
 app.get('/api/analytics/test', async (req, res) => {
   try {
     const creds = JSON.parse(process.env.GA_SERVICE_ACCOUNT)
@@ -877,6 +909,7 @@ app.get('/api/analytics/test', async (req, res) => {
 
   //DATOS HISTORICOS FILTRADOS POR LOS ULTIMOS 7 DÍAS
 
+  // Subproceso: historial corto (ultimos 7 dias)
   app.get('/api/analytics/historial', checkJwt, async (req, res) => {
     try {
       console.log(req.auth)
@@ -919,6 +952,7 @@ app.get('/api/analytics/test', async (req, res) => {
   })
 
   //DATOS DE PAGINAS ESPECIFICAS
+  // Subproceso: top paginas visitadas (sin /admin)
   app.get('/api/analytics/paginas', checkJwt, async (req, res) => {
     try {
       console.log(req.auth)
@@ -973,6 +1007,7 @@ app.get('/api/analytics/test', async (req, res) => {
 
   //POR DONDE ENTRARON LAS VISITAS (URL MANUAL, REDIRECCION, UNASIGNED)
 
+  // Subproceso: origen de trafico por canal
   app.get('/api/analytics/origen', checkJwt, async (req, res) => {
     try {
       console.log(req.auth)
@@ -999,6 +1034,7 @@ app.get('/api/analytics/test', async (req, res) => {
 
   //LUGAR DE ORIGEN DE LAS VISITAS
 
+  // Subproceso: sesiones por pais
   app.get('/api/analytics/ubicacion', checkJwt, async (req, res) => {
     try {
       console.log(req.auth)
@@ -1027,6 +1063,7 @@ app.get('/api/analytics/test', async (req, res) => {
 
   //DISPOSITIVOS
 
+  // Subproceso: sesiones por tipo de dispositivo
   app.get('/api/analytics/dispositivos', checkJwt, async (req, res) => {
     try {
       console.log(req.auth)
@@ -1051,6 +1088,7 @@ app.get('/api/analytics/test', async (req, res) => {
     }
   })
 
+  // Subproceso: sesiones por hora del dia
   app.get('/api/analytics/horas', checkJwt, async (req, res) => {
     try {
       console.log(req.auth)
@@ -1077,6 +1115,7 @@ app.get('/api/analytics/test', async (req, res) => {
 
   //ENDPOINT DE EVENTOS
 
+  // Subproceso: eventos clave del sitio
   app.get('/api/analytics/eventos', checkJwt, async (req, res) => {
     try {
       console.log(req.auth)
@@ -1113,6 +1152,7 @@ app.get('/api/analytics/test', async (req, res) => {
   // HELPER: M2M Token reutilizable
 
 
+  // Subproceso: helper token M2M para Management API
   async function getManagementToken() {
     const response = await fetch(`https://${process.env.AUTH0_DOMAIN}/oauth/token`, {
       method: "POST",
@@ -1136,6 +1176,7 @@ app.get('/api/analytics/test', async (req, res) => {
 
 
   // PATCH /api/users/:id — Editar usuario (nombre, email, blocked)
+  // Subproceso: editar usuario (nombre/email/bloqueo)
   app.patch("/api/users/:id", checkJwt, async (req, res) => {
     try {
       const userId = decodeURIComponent(req.params.id)
@@ -1211,6 +1252,7 @@ app.get('/api/analytics/test', async (req, res) => {
   // PATCH /api/users/:id/password — Cambiar contraseña
 
 
+  // Subproceso: actualizar password de usuario
   app.patch("/api/users/:id/password", checkJwt, async (req, res) => {
     try {
       const userId = decodeURIComponent(req.params.id);
@@ -1259,6 +1301,7 @@ app.get('/api/analytics/test', async (req, res) => {
   // GET /api/users/:id/roles — Roles de un usuario
 
 
+  // Subproceso: consultar roles de un usuario
   app.get("/api/users/:id/roles", checkJwt, async (req, res) => {
     try {
       const userId = decodeURIComponent(req.params.id);
@@ -1287,6 +1330,7 @@ app.get('/api/analytics/test', async (req, res) => {
   // POST /api/users/:id/roles — Asignar rol a usuario
 
 
+  // Subproceso: asignar uno o varios roles a usuario
   app.post("/api/users/:id/roles", checkJwt, async (req, res) => {
     try {
       const userId = decodeURIComponent(req.params.id);
@@ -1336,6 +1380,7 @@ app.get('/api/analytics/test', async (req, res) => {
   // PATCH /api/roles/:id — Activar/desactivar rol
 
 
+  // Subproceso: activar/desactivar rol (marcado en descripcion)
   app.patch("/api/roles/:id", checkJwt, async (req, res) => {
     try {
       const roleId = req.params.id;
@@ -1406,6 +1451,7 @@ app.get('/api/analytics/test', async (req, res) => {
   });
 
   // PUT /api/users/:id/roles — Reemplazar rol de usuario
+  // Subproceso: reemplazar rol actual de un usuario
   app.put("/api/users/:id/roles", checkJwt, async (req, res) => {
     try {
       const userId = decodeURIComponent(req.params.id)
@@ -1469,6 +1515,7 @@ app.get('/api/analytics/test', async (req, res) => {
 
   //TABLA HISTORICA DE ANALÍTICAS
 
+  // Subproceso: historial amplio por rango con cache + paginacion
   app.get('/api/analytics/historico', checkJwt, async (req, res) => {
     try {
       const { startDate, endDate, page = '1' } = req.query
@@ -1581,7 +1628,11 @@ app.get('/api/analytics/test', async (req, res) => {
     }
   })
 
+  //==================== FIN: MODULO GOOGLE ANALYTICS ====================
+
+  //==================== INICIO: MODULO PERMISOS AUTH0 (SCOPES API) ====================
   // Helper para obtener el resource server ID de PTC Backend dinámicamente
+  // Subproceso: resolver resource server ID de la API
   async function getResourceServerId(access_token) {
     const res = await fetch(
       `https://${process.env.AUTH0_DOMAIN}/api/v2/resource-servers?identifier=${encodeURIComponent(process.env.AUTH0_AUDIENCE)}`,
@@ -1593,6 +1644,7 @@ app.get('/api/analytics/test', async (req, res) => {
   }
 
   //GET Permissions
+  // Subproceso: listar scopes/permisos de la API
   app.get("/api/permissions", checkJwt, async (req, res) => {
     try {
       const access_token = await getManagementToken();
@@ -1624,6 +1676,7 @@ app.get('/api/analytics/test', async (req, res) => {
   });
 
   // GET /api/roles/:id/permissions — Permisos de un rol
+  // Subproceso: consultar permisos de un rol
   app.get("/api/roles/:id/permissions", checkJwt, async (req, res) => {
     try {
       const roleId = req.params.id
@@ -1649,6 +1702,7 @@ app.get('/api/analytics/test', async (req, res) => {
   })
 
   // POST /api/roles/:id/permissions — Asignar permisos a un rol
+  // Subproceso: asignar permisos a rol
   app.post("/api/roles/:id/permissions", checkJwt, async (req, res) => {
     try {
       const roleId = req.params.id;
@@ -1701,6 +1755,7 @@ app.get('/api/analytics/test', async (req, res) => {
   });
 
   // DELETE /api/roles/:id/permissions — Quitar permisos de un rol
+  // Subproceso: quitar permisos de rol
   app.delete("/api/roles/:id/permissions", checkJwt, async (req, res) => {
     try {
       const roleId = req.params.id;
@@ -1752,6 +1807,7 @@ app.get('/api/analytics/test', async (req, res) => {
   });
 
   // POST /api/permissions — Crear nuevo permiso en PTC Backend
+  // Subproceso: crear permiso nuevo en scopes de la API
   app.post("/api/permissions", checkJwt, async (req, res) => {
     try {
       const { value, description } = req.body
@@ -1816,6 +1872,7 @@ app.get('/api/analytics/test', async (req, res) => {
   })
 
   // DELETE /api/permissions — Eliminar permiso de PTC Backend
+  // Subproceso: eliminar permiso de scopes de la API
   app.delete("/api/permissions", checkJwt, async (req, res) => {
     try { 
       const { value } = req.body
@@ -1872,6 +1929,7 @@ app.get('/api/analytics/test', async (req, res) => {
   })
 
   // PATCH /api/permissions — Editar nombre y descripción de un permiso
+  // Subproceso: editar nombre/descripcion de permiso
   app.patch("/api/permissions", checkJwt, async (req, res) => {
     try {
       const { oldValue, newValue, description } = req.body
@@ -1946,6 +2004,10 @@ app.get('/api/analytics/test', async (req, res) => {
     }
   })
 
+  //==================== FIN: MODULO PERMISOS AUTH0 (SCOPES API) ====================
+
+  //==================== INICIO: AUDITORIA Y ARRANQUE ====================
+  // Subproceso: leer historial de auditoria local
   app.get('/api/auditoria', checkJwt, async (req, res) => {
     try {
       if (!fs.existsSync('./logs/auditoria.json')) return res.json([])
@@ -1963,3 +2025,4 @@ app.get('/api/analytics/test', async (req, res) => {
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });
+  //==================== FIN: AUDITORIA Y ARRANQUE ====================

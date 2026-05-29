@@ -167,10 +167,18 @@ export default function UserEditModal({ open, onOpenChange, user, onUserUpdated,
     }
   }
 
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
   const handleSubmit = async () => {
-    setLoading(true)
     setError(null)
     setSuccess(false)
+
+    if (email.trim() !== (user.email ?? "") && !EMAIL_REGEX.test(email.trim())) {
+      setError("Ingrese un correo válido")
+      return
+    }
+
+    setLoading(true)
 
     try {
       const token = await getAccessTokenSilently({
@@ -250,6 +258,7 @@ export default function UserEditModal({ open, onOpenChange, user, onUserUpdated,
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
+            <p className="text-xs italic text-text-primary/50">Formato: correo@ejemplo.com</p>
           </div>
 
           <div className="flex flex-col gap-2 p-2">
@@ -271,6 +280,7 @@ export default function UserEditModal({ open, onOpenChange, user, onUserUpdated,
                 </div>
               </div>
 
+              <p className="text-xs italic text-text-primary/50">Mín. 8 caracteres</p>
               {passwordError && <p className="text-sm text-red-500">{passwordError}</p>}
               {passwordSuccess && <p className="text-sm text-green-500">Contraseña actualizada correctamente</p>}  {/* ← */}
 
