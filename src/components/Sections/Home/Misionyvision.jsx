@@ -1,6 +1,7 @@
 import { useRef } from "react"
 import { motion, useScroll, useTransform } from "framer-motion"
 import CreditCard3D from "./Components/CreditCard3D"
+import fondoMisionyVision from "../../../assets/img/fondoMisionyVision.png"
 
 export default function Misionyvision() {
   const sectionRef = useRef(null)
@@ -28,7 +29,7 @@ export default function Misionyvision() {
         whileInView={{ opacity: 1 }}
         transition={{ duration: 0.8, delay: 0.3 }}
         viewport={{ once: true }}
-        src="https://i.imgur.com/9LNA1Il.png"
+        src={fondoMisionyVision}
         alt=""
         className="absolute inset-0 w-full h-full object-cover z-0 opacity-70"
       />

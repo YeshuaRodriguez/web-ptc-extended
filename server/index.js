@@ -888,24 +888,6 @@ app.get('/api/analytics/resumen', checkJwt, async (req, res) => {
     }
   })
 
-// Subproceso: diagnostico de credenciales GA4
-app.get('/api/analytics/test', async (req, res) => {
-  try {
-    const creds = JSON.parse(process.env.GA_SERVICE_ACCOUNT)
-    
-    res.json({ 
-      client_email: creds.client_email,
-      property_id: process.env.GA_PROPERTY_ID,
-      private_key_start: creds.private_key?.substring(0, 60),
-      private_key_end: creds.private_key?.slice(-60),
-      has_newlines: creds.private_key?.includes('\n'),
-      key_length: creds.private_key?.length
-    })
-  } catch (e) {
-    res.json({ parse_error: e.message })
-  }
-})
-
 
   //DATOS HISTORICOS FILTRADOS POR LOS ULTIMOS 7 DÍAS
 

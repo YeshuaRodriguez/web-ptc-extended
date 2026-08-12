@@ -11,11 +11,11 @@ export default function Estadistica(){
   {/* Estadistica 1 */}
   <div className="text-center">
     <div className="text-3xl md:text-5xl font-bold flex justify-center">
-      <NumberCounter value={100000} duration={1} />
+      <NumberCounter value={40000000} duration={1} />
       <p>+</p>
     </div>
-    <p className="py-2 text-base md:text-lg bg-clip-text text-transparent bg-gradient-to-r from-brand-secondary to-brand-accent">
-      Lorem ipsu dolor sit
+    <p className="py-2 text-base md:text-lg bg-clip-text text-transparent bg-gradient-to-t from-brand-secondary to-brand-accent-70">
+      Lempiras procesados diario
     </p>
   </div>
 

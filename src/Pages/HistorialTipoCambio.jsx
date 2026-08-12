@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import TipoCambio from "@/api/bchapi";
 import MiniHero from "@/components/Layout/MiniHero";
 import imgCambioDolarHero from "@/assets/img/hero/cambiodolarhero.webp";
+import Conversion from "@/components/Sections/CambioDolar/Conversion";
 
 export default function HistorialTipoCambio() {
 
@@ -42,10 +43,16 @@ export default function HistorialTipoCambio() {
 
       <TipoCambio />
 
+      <Conversion/>
+
       <div className="flex md:flex-row flex-col justify-center gap-10 my-40">
 
         <div className="flex flex-col items-center gap-10">
-          <h1 className="text-lg md:text-3xl text-text-primary">Historial Compra de los últimos 7 días</h1>
+          <div className="flex flex-col justify-center items-center">
+            <h1 className="text-lg md:text-3xl text-text-primary">Historial <span className="font-bold text-brand-accent">Compra</span></h1>
+            <h3 className="text-lg text-text-primary/60 tracking-wider">Últimos 7 días</h3>
+          </div>
+
           <table className="table-auto md:table-extended w-100 my-20 mt-0">
             <thead className="bg-gray-800">
               <tr>
@@ -65,8 +72,12 @@ export default function HistorialTipoCambio() {
             </tbody>
           </table>
         </div>
+
         <div className="flex flex-col items-center gap-5">
-          <h1 className="text-lg md:text-3xl text-text-primary">Historial Venta de los últimos 7 días</h1>
+          <div className="flex flex-col justify-center items-center">
+            <h1 className="text-lg md:text-3xl text-text-primary">Historial <span className="font-bold text-brand-accent">Venta</span></h1>
+            <h3 className="text-lg text-text-primary/60 tracking-wider">Últimos 7 días</h3>
+          </div>
           <table className="table-auto md:table-extended w-100 my-20 mt-5">
             <thead className="bg-gray-800">
               <tr>
